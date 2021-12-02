@@ -25,5 +25,24 @@ REQUIRE Puzzle01Data.fs
 SAMPLE SAMPLE-SIZE INCREASES .
 PUZZLE PUZZLE-SIZE INCREASES .
 
+: @-- ( addr -- [addr],addr-1 )
+    DUP CELL -      \ addr,addr-1
+    SWAP @ SWAP ;   \ [addr],addr-1
 
+: WINDOW ( addr -- [addr-2]+[addr-1]+[addr] )
+    @-- @-- @--   \ [addr],[addr-1],[addr-2],addr-3
+    DROP + + ;
+
+: WINDOW-INCREASES ( addr,size -- n )
+    3 - SWAP             \ size-3,addr
+    3 CELLS + SWAP       \ addr+3,size-3
+    CELLS OVER + SWAP    \ limit,start
+    0 -ROT               \ acc,limit,start
+    DO
+        I CELL - WINDOW
+        I WINDOW < IF 1+ THEN
+    CELL +LOOP ;
+
+SAMPLE SAMPLE-SIZE WINDOW-INCREASES .
+PUZZLE PUZZLE-SIZE WINDOW-INCREASES .
 BYE
