@@ -1,3 +1,7 @@
+2 BASE !
+       11111 CONSTANT  5BITS-MASK
+111111111111 CONSTANT 12BITS-MASK
+DECIMAL
 CREATE SAMPLE
 2 BASE !
 00100 ,
@@ -15,52 +19,42 @@ CREATE SAMPLE
 DECIMAL
 HERE SAMPLE - CELL / CONSTANT SAMPLE-SIZE
 
+DEFER PREDICATE
+: IS-SET ;
+: IS-CLEAR 0= ;
+
+
 : MOST-COMMON-BIT ( bitp,addr,size -- bit|0 )
     DUP >R 0 -ROT             \ bitp,0,addr,size
     CELLS OVER + SWAP DO      \ bitp,acc
         OVER I @ AND          \ bitp,acc,bit|0
-        IF 1+ THEN
+        PREDICATE IF 1+ THEN
     CELL +LOOP                \ bitp,acc
     R> 2/ < IF DROP 0 THEN ;
 
-: LEAST-COMMON-BIT ( bitp,addr,size -- bit|0 )
-    DUP >R 0 -ROT             \ bitp,0,addr,size
-    CELLS OVER + SWAP DO      \ bitp,acc
-        OVER I @ AND          \ bitp,acc,bit|0
-        0= IF 1+ THEN
-    CELL +LOOP                \ bitp,acc
-    R> 2/ < IF DROP 0 THEN ;
-
-2 BASE
+2 BASE !
 1000000000000 CONSTANT MAXBIT
 DECIMAL
 
-: BIT-MASK ( n -- bits )
-    1 SWAP 0 DO 2* LOOP 1- ;
-
-: MOST-COMMON-BITS ( max,addr,size -- bits ) 
-    ROT BIT-MASK -ROT               \ mask,addr,size
-    MAXBIT 1 0 -ROT DO              \ mask,addr,size,0
-        I 2OVER                     \ mask,addr,size,0,I,addr,size
-        MOST-COMMON-BIT             \ mask,addr,size,0,bitp
-        OR I +LOOP                  \ mask,addr,size,bitp
-    -ROT 2DROP AND ;
-    
-: LEAST-COMMON-BITS 
-    ROT BIT-MASK -ROT
+: MOST-COMMON-BITS ( addr,size -- bits )
     MAXBIT 1 0 -ROT DO              \ addr,size,0
         I 2OVER                     \ addr,size,0,I,addr,size
-        LEAST-COMMON-BIT             \ addr,size,0,bitp
+        MOST-COMMON-BIT             \ addr,size,0,bitp
         OR I +LOOP                  \ addr,size,bitp
-    -ROT 2DROP AND ;
-5 SAMPLE SAMPLE-SIZE MOST-COMMON-BITS 
-5 SAMPLE SAMPLE-SIZE LEAST-COMMON-BITS 
+    -ROT 2DROP ;
+
+' IS-SET IS PREDICATE
+SAMPLE SAMPLE-SIZE MOST-COMMON-BITS 5BITS-MASK AND
+' IS-CLEAR IS PREDICATE
+SAMPLE SAMPLE-SIZE MOST-COMMON-BITS 5BITS-MASK AND
 
 ." SOLUTION FOR SAMPLE:"  * . CR
 
 INCLUDE Puzzle03Data.fs
 
-12 PUZZLE PUZZLE-SIZE MOST-COMMON-BITS
-12 PUZZLE PUZZLE-SIZE LEAST-COMMON-BITS
+' IS-SET IS PREDICATE
+PUZZLE PUZZLE-SIZE MOST-COMMON-BITS 12BITS-MASK AND
+' IS-CLEAR IS PREDICATE
+PUZZLE PUZZLE-SIZE MOST-COMMON-BITS 12BITS-MASK AND
 ." SOLUTION FOR PUZZLE:" * . CR
 BYE
